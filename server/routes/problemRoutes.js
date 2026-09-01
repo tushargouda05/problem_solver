@@ -1,6 +1,6 @@
 const express = require("express");
 const Problem = require("../models/problem");
-const protect  = require("../middleware/authMiddleware");
+const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -20,22 +20,22 @@ router.post("/", protect, async (req, res) => {
         await newProblem.save();
 
         res.status(201).json(newProblem);
-    } 
+    }
     catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
 });
 // Get all problems
-router.get("/",async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const { category, search } = req.query;
         const filter = {}; if (category) filter.category = category;
-         if (search) filter.title = { $regex: search, $options: "i" };
-         const problems = await Problem.find(filter).populate("author", "username").sort({ createdAt: -1 });
-         
-         res.status(200).json(problems);
-    } 
+        if (search) filter.title = { $regex: search, $options: "i" };
+        const problems = await Problem.find(filter).populate("author", "username").sort({ createdAt: -1 });
+
+        res.status(200).json(problems);
+    }
     catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
@@ -43,7 +43,7 @@ router.get("/",async (req, res) => {
 });
 
 // Get a single problem
-router.get("/:id", async(req, res) => {
+router.get("/:id", async (req, res) => {
     try {
         const problem = await Problem.findById(req.params.id).populate("author", "username");
         if (!problem) {
@@ -58,13 +58,48 @@ router.get("/:id", async(req, res) => {
 });
 
 // Edit a problem
-router.put("/:id", protect, (req, res) => {
-    res.send("edit problem endpoint");
+router.put("/:id", protect, async (req, res) => {
+    try {
+        const problem = await Problem.findById(req.params.id);
+        if (!problem) {
+            return res.status(404).json({ message: "Problem not found" });
+        }
+        if (problem.author.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Not authorized to edit this problem" });
+        }
+        const { title, description, category, image } = req.body;
+        if (title) problem.title = title; if (description) problem.description = description;
+        if (category) problem.category = category;
+        if (image) problem.image = image;
+        await problem.save();
+        res.status(200).json(problem);
+
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+
 });
 
 // Delete a problem
-router.delete("/:id", protect, (req, res) => {
-    res.send("delete problem endpoint");
+router.delete("/:id", protect, async (req, res) => {
+    try{
+        const problem = await Problem.findById(req.params.id);
+        if (!problem) {
+            return res.status(404).json({ message: "Problem not found" });
+        }
+        if (problem.author.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Not authorized to edit this problem" });
+        }
+        await problem.deleteOne();
+        res.status(200).json({ message: "Problem deleted" });
+
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
 });
 
 module.exports = router;
