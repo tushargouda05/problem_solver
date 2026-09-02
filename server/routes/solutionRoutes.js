@@ -33,6 +33,16 @@ router.post("/:problemId", protect, async (req, res) => {
 //list solutions for a problem, no protect — guests can view
 router.get("/:problemId", async (req, res) => {
     try {
+        const { problemId } = req.params;
+        const { search } = req.query; 
+        const filter = { problem: problemId };
+        if (search) filter.content = { $regex: search, $options: "i" };
+
+        const solutions = await Solution.find(filter)
+            .populate("author", "username")
+            .sort({ createdAt: 1 });
+
+        res.status(200).json(solutions);
 
     }
 
@@ -47,6 +57,19 @@ router.get("/:problemId", async (req, res) => {
 //edit own solution
 router.put("/:id", protect, async (req, res) => {
     try {
+        
+        const solution = await Solution.findById(req.params.id);
+                if (!solution) {
+                    return res.status(404).json({ message: "solution not found" });
+                }
+                if (solution.author.toString() !== req.user.id) {
+                    return res.status(403).json({ message: "Not authorized to edit this solution" });
+                }
+                const { content, image } = req.body;
+                if (content) solution.content = content;
+                if (image) solution.image = image;
+                await solution.save();
+                res.status(200).json(solution);
 
     }
 
@@ -61,6 +84,16 @@ router.put("/:id", protect, async (req, res) => {
 //delete own solution
 router.delete("/:id", protect, async (req, res) => {
     try {
+                const solution = await Solution.findById(req.params.id);
+                if (!solution) {
+                    return res.status(404).json({ message: "solution not found" });
+                }
+                if (solution.author.toString() !== req.user.id) {
+                    return res.status(403).json({ message: "Not authorized to delete this solution" });
+                }
+                await solution.deleteOne();
+        res.status(200).json({ message: "Solution deleted" });
+
 
     }
 
