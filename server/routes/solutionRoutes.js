@@ -104,5 +104,93 @@ router.delete("/:id", protect, async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
+// Like a solution
+router.post("/:id/like", protect, async (req, res) => {
+    try {
+        const solution = await Solution.findById(req.params.id);
+
+        if (!solution) {
+            return res.status(404).json({
+                message: "Solution not found",
+            });
+        }
+
+        const userId = req.user.id;
+
+        const alreadyLiked = solution.likes.some(
+            id => id.toString() === userId
+        );
+
+        if (alreadyLiked) {
+            // Toggle off
+            solution.likes = solution.likes.filter(
+                id => id.toString() !== userId
+            );
+        } else {
+            // Add like
+            solution.likes.push(userId);
+
+            // Remove existing dislike
+            solution.dislikes = solution.dislikes.filter(
+                id => id.toString() !== userId
+            );
+        }
+
+        await solution.save();
+
+        res.status(200).json(solution);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: "Server error",
+        });
+    }
+});
+
+
+// Dislike a solution
+router.post("/:id/dislike", protect, async (req, res) => {
+    try {
+        const solution = await Solution.findById(req.params.id);
+
+        if (!solution) {
+            return res.status(404).json({
+                message: "Solution not found",
+            });
+        }
+
+        const userId = req.user.id;
+
+        const alreadyDisliked = solution.dislikes.some(
+            id => id.toString() === userId
+        );
+
+        if (alreadyDisliked) {
+            // Toggle off
+            solution.dislikes = solution.dislikes.filter(
+                id => id.toString() !== userId
+            );
+        } else {
+            // Add dislike
+            solution.dislikes.push(userId);
+
+            // Remove existing like
+            solution.likes = solution.likes.filter(
+                id => id.toString() !== userId
+            );
+        }
+
+        await solution.save();
+
+        res.status(200).json(solution);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: "Server error",
+        });
+    }
+});
 
 module.exports = router;
