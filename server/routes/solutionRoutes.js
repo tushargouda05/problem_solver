@@ -1,7 +1,9 @@
 const express = require("express");
 const Problem = require("../models/problem");
+
 const protect = require("../middleware/authMiddleware");
 const Solution = require("../models/Solution");
+const Notification = require("../models/notification");
 
 const router = express.Router();
 
@@ -23,6 +25,9 @@ router.post("/:problemId", protect, async (req, res) => {
         });
 
         await newSolution.save();
+        if (problem.author.toString() !== req.user.id) {
+            await Notification.create({ recipient: problem.author, message: `Someone answered your problem: "${problem.title}"`, relatedProblem: problem._id });
+        }
 
         res.status(201).json(newSolution);
     } catch (err) {
@@ -34,7 +39,7 @@ router.post("/:problemId", protect, async (req, res) => {
 router.get("/:problemId", async (req, res) => {
     try {
         const { problemId } = req.params;
-        const { search } = req.query; 
+        const { search } = req.query;
         const filter = { problem: problemId };
         if (search) filter.content = { $regex: search, $options: "i" };
 
@@ -57,19 +62,19 @@ router.get("/:problemId", async (req, res) => {
 //edit own solution
 router.put("/:id", protect, async (req, res) => {
     try {
-        
+
         const solution = await Solution.findById(req.params.id);
-                if (!solution) {
-                    return res.status(404).json({ message: "solution not found" });
-                }
-                if (solution.author.toString() !== req.user.id) {
-                    return res.status(403).json({ message: "Not authorized to edit this solution" });
-                }
-                const { content, image } = req.body;
-                if (content) solution.content = content;
-                if (image) solution.image = image;
-                await solution.save();
-                res.status(200).json(solution);
+        if (!solution) {
+            return res.status(404).json({ message: "solution not found" });
+        }
+        if (solution.author.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Not authorized to edit this solution" });
+        }
+        const { content, image } = req.body;
+        if (content) solution.content = content;
+        if (image) solution.image = image;
+        await solution.save();
+        res.status(200).json(solution);
 
     }
 
@@ -84,14 +89,14 @@ router.put("/:id", protect, async (req, res) => {
 //delete own solution
 router.delete("/:id", protect, async (req, res) => {
     try {
-                const solution = await Solution.findById(req.params.id);
-                if (!solution) {
-                    return res.status(404).json({ message: "solution not found" });
-                }
-                if (solution.author.toString() !== req.user.id) {
-                    return res.status(403).json({ message: "Not authorized to delete this solution" });
-                }
-                await solution.deleteOne();
+        const solution = await Solution.findById(req.params.id);
+        if (!solution) {
+            return res.status(404).json({ message: "solution not found" });
+        }
+        if (solution.author.toString() !== req.user.id) {
+            return res.status(403).json({ message: "Not authorized to delete this solution" });
+        }
+        await solution.deleteOne();
         res.status(200).json({ message: "Solution deleted" });
 
 
