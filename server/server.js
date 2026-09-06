@@ -30,6 +30,20 @@ app.get("/", (req, res) => {
     res.send("Hello World");
 });
 
+app.use((err, req, res, next) => {
+    console.error(err.message);
+
+    if (err.message && err.message.includes("Invalid file type")) {
+        return res.status(400).json({ message: err.message });
+    }
+
+    if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({ message: "File too large. Max size is 5MB." });
+    }
+
+    res.status(500).json({ message: "Server error" });
+});
+
 app.listen(5000, () => {
     console.log("Server running on port 5000");
 });
