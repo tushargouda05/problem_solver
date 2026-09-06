@@ -4,18 +4,23 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const problemRoutes = require("./routes/problemRoutes");
-const solutionRoutes = require("./routes/solutionRoutes"); 
-const commentRoutes = require("./routes/commentRoutes")
+const solutionRoutes = require("./routes/solutionRoutes");
+const commentRoutes = require("./routes/commentRoutes");
+const uploadRoutes = require("./routes/uploadRoutes");
+
 dotenv.config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/solutions", solutionRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/upload", uploadRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("MongoDB connected"))
