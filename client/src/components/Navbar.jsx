@@ -17,7 +17,7 @@ return (
                 <div className="d-flex align-items-center gap-2">
 
                     {user ? (
-                        <>
+                        <><Link className="btn btn-outline-primary me-2" to="/post-problem">Post Problem</Link>
                             <span className="me-3">
                                 Hi, {user.username}
                             </span>

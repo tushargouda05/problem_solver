@@ -4,7 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Navbar from './components/Navbar';
 import ProblemDetails from './pages/ProblemDetails';
-
+import PostProblem from './pages/PostProblem';
 function App() {
   return (
     <div>
@@ -16,6 +16,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/problems/:id" element={<ProblemDetails />} />
+      <Route path="/post-problem" element={<PostProblem />} />
     </Routes>
     </div>
   );
