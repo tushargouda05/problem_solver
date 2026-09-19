@@ -60,6 +60,20 @@ const ProblemDetails = () => {
         }
         catch (err) { alert("Failed to post solution"); }
     };
+    const handleLike = async (solutionId) => {
+        try {
+            const res = await api.post(`/solutions/${solutionId}/like`);
+            setSolutions(solutions.map((s) => (s._id === solutionId ? res.data : s)));
+        }
+        catch (err) { alert("Failed to like"); }
+    };
+     const handleDislike = async (solutionId) => {
+        try {
+            const res = await api.post(`/solutions/${solutionId}/dislike`);
+            setSolutions(solutions.map((s) => (s._id === solutionId ? res.data : s)));
+        }
+        catch (err) { alert("Failed to like"); }
+    };
 
     if (loading) {
         return <p>Loading...</p>;
@@ -112,6 +126,9 @@ const ProblemDetails = () => {
                             <div className="card-body">
                                 <p className="mb-1">{solution.content}</p>
                                 <small className="text-muted">By {solution.author.username}</small>
+                                <button className={`btn btn-sm me-2 ${solution.likes.includes(user?.id) ? "btn-success" : "btn-outline-success"}`} onClick={() => handleLike(solution._id)} disabled={!user}> like{solution.likes.length}</button>
+                                <button className={`btn btn-sm me-2 ${solution.dislikes.includes(user?.id) ? "btn-danger" : "btn-outline-danger"}`} onClick={() => handleDislike(solution._id)} disabled={!user}> dislike{solution.dislikes.length}</button>
+                            
                             </div>
                         </div>
                     ))
