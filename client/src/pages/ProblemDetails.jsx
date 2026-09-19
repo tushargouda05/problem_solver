@@ -11,6 +11,8 @@ const ProblemDetails = () => {
     const [problem, setProblem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [solutions, setSolutions] = useState([]);
+    const [newSolution, setNewSolution] = useState("");
 
     useEffect(() => {
         const fetchProblem = async () => {
@@ -26,6 +28,17 @@ const ProblemDetails = () => {
 
         fetchProblem();
     }, [id]);
+    useEffect(() => {
+        const fetchSolutions = async () => {
+            try {
+                const res = await api.get(`/solutions/${id}`);
+                setSolutions(res.data);
+            }
+            catch (err) {
+                console.error(err);
+            }
+        }; fetchSolutions();
+    }, [id]);
 
     const handleDelete = async () => {
         if (!window.confirm("Delete this problem?")) {
@@ -39,6 +52,14 @@ const ProblemDetails = () => {
             alert("Failed to delete");
         }
     };
+    const handlePostSolution = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await api.post(`/solutions/${id}`, { content: newSolution });
+            setSolutions([...solutions, res.data]); setNewSolution("");
+        }
+        catch (err) { alert("Failed to post solution"); }
+    };
 
     if (loading) {
         return <p>Loading...</p>;
@@ -50,45 +71,52 @@ const ProblemDetails = () => {
 
     return (
         <div className="container mt-4">
-
             <div className="card">
                 <div className="card-body">
-
-                    <span className="badge bg-secondary mb-2">
-                        {problem.category}
-                    </span>
-
-                    <h1 className="card-title">
-                        {problem.title}
-                    </h1>
-                    <p className="card-text">
-                        {problem.description}
-                    </p>
-
-                    <p>
-                        Posted By: {problem.author.username}
-                    </p>
+                    <span className="badge bg-secondary mb-2">{problem.category}</span>
+                    <h1 className="card-title">{problem.title}</h1>
+                    <p className="card-text">{problem.description}</p>
+                    <p>Posted By: {problem.author.username}</p>
 
                     {user && problem.author._id === user.id && (
                         <div className="mt-3">
-
-                            <button className="btn btn-warning me-2">
-                                Edit
-                            </button>
-
-                            <button
-                                className="btn btn-danger"
-                                onClick={handleDelete}
-                            >
-                                Delete
-                            </button>
-
+                            <button className="btn btn-warning me-2">Edit</button>
+                            <button className="btn btn-danger" onClick={handleDelete}>Delete</button>
                         </div>
                     )}
-
                 </div>
             </div>
 
+            <div className="mt-4">
+                <h3>Solutions</h3>
+
+                {user ? (
+                    <form onSubmit={handlePostSolution}>
+                        <textarea
+                            className="form-control mb-2"
+                            value={newSolution}
+                            onChange={(e) => setNewSolution(e.target.value)}
+                            placeholder="Write a solution..."
+                        />
+                        <button className="btn btn-primary mb-3">Post Solution</button>
+                    </form>
+                ) : (
+                    <p className="text-muted">Log in to post a solution.</p>
+                )}
+
+                {solutions.length === 0 ? (
+                    <p>No solutions yet.</p>
+                ) : (
+                    solutions.map((solution) => (
+                        <div className="card mb-2" key={solution._id}>
+                            <div className="card-body">
+                                <p className="mb-1">{solution.content}</p>
+                                <small className="text-muted">By {solution.author.username}</small>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     );
 };
