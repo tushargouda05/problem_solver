@@ -13,6 +13,8 @@ const ProblemDetails = () => {
     const [error, setError] = useState("");
     const [solutions, setSolutions] = useState([]);
     const [newSolution, setNewSolution] = useState("");
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState("");
 
     useEffect(() => {
         const fetchProblem = async () => {
@@ -28,6 +30,7 @@ const ProblemDetails = () => {
 
         fetchProblem();
     }, [id]);
+
     useEffect(() => {
         const fetchSolutions = async () => {
             try {
@@ -39,6 +42,16 @@ const ProblemDetails = () => {
             }
         }; fetchSolutions();
     }, [id]);
+
+    useEffect(() => {
+        const fetchComments = async () => {
+            try {
+                const res = await api.get(`/comments/Problem/${id}`); setComments(res.data);
+            } catch (err) { console.error(err); }
+        };
+        fetchComments();
+    }, [id]);
+
 
     const handleDelete = async () => {
         if (!window.confirm("Delete this problem?")) {
@@ -67,7 +80,7 @@ const ProblemDetails = () => {
         }
         catch (err) { alert("Failed to like"); }
     };
-     const handleDislike = async (solutionId) => {
+    const handleDislike = async (solutionId) => {
         try {
             const res = await api.post(`/solutions/${solutionId}/dislike`);
             setSolutions(solutions.map((s) => (s._id === solutionId ? res.data : s)));
@@ -75,6 +88,13 @@ const ProblemDetails = () => {
         catch (err) { alert("Failed to like"); }
     };
 
+    const handlePostComment = async (e) => {
+        e.preventDefault(); try {
+            const res = await api.post(`/comments/Problem/${id}`, { content: newComment }); setComments([...comments, res.data]); setNewComment("");
+        } catch (err) {
+            alert("Failed to post comment");
+        }
+    };
     if (loading) {
         return <p>Loading...</p>;
     }
@@ -128,11 +148,41 @@ const ProblemDetails = () => {
                                 <small className="text-muted">By {solution.author.username}</small>
                                 <button className={`btn btn-sm me-2 ${solution.likes.includes(user?.id) ? "btn-success" : "btn-outline-success"}`} onClick={() => handleLike(solution._id)} disabled={!user}> like{solution.likes.length}</button>
                                 <button className={`btn btn-sm me-2 ${solution.dislikes.includes(user?.id) ? "btn-danger" : "btn-outline-danger"}`} onClick={() => handleDislike(solution._id)} disabled={!user}> dislike{solution.dislikes.length}</button>
-                            
+
                             </div>
                         </div>
                     ))
                 )}
+
+                {/* Comments */}
+                <div className="mt-4">
+                    <h3>Comments</h3>
+
+                    {user ? (
+                        <form onSubmit={handlePostComment}>
+                            <textarea
+                                className="form-control mb-2"
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                placeholder="Write a comment..."
+                                required
+                            />
+
+                            <button className="btn btn-primary mb-3">
+                                Post Comment
+                            </button>
+                        </form>
+                    ) : (
+                        <p className="text-muted">Log in to comment.</p>
+                    )}
+
+                    {comments.map((comment) => (
+                        <p key={comment._id}>
+                            <strong>by {comment.author.username}:</strong>{" "}
+                            {comment.content}
+                        </p>
+                    ))}
+                </div>
             </div>
         </div>
     );
