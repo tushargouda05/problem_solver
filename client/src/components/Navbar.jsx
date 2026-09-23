@@ -22,6 +22,7 @@ return (
                                 Hi, {user.username}
                             </span>
                             <Link className="btn btn-outline-secondary me-2" to="/profile">Profile</Link>
+                            <Link className="btn btn-outline-info me-2" to="/notifications">Notifications</Link>
 
                             <button
                                 className="btn btn-outline-danger"
