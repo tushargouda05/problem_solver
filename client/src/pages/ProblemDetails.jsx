@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import AuthContext from "../context/AuthContext";
+import { Link } from "react-router-dom";
 
 const ProblemDetails = () => {
     const { id } = useParams();
@@ -114,7 +115,12 @@ const ProblemDetails = () => {
 
                     {user && problem.author._id === user.id && (
                         <div className="mt-3">
-                            <button className="btn btn-warning me-2">Edit</button>
+                            <Link
+                                to={`/problems/${id}/edit`}
+                                className="btn btn-warning me-2"
+                            >
+                                Edit
+                            </Link>
                             <button className="btn btn-danger" onClick={handleDelete}>Delete</button>
                         </div>
                     )}
