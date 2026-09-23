@@ -21,6 +21,7 @@ return (
                             <span className="me-3">
                                 Hi, {user.username}
                             </span>
+                            <Link className="btn btn-outline-secondary me-2" to="/profile">Profile</Link>
 
                             <button
                                 className="btn btn-outline-danger"

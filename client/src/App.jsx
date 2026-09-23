@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import ProblemDetails from './pages/ProblemDetails';
 import PostProblem from './pages/PostProblem';
 import EditProblem from './pages/EditProblem';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/problems/:id" element={<ProblemDetails />} />
         <Route path="/post-problem" element={<PostProblem />} />
         <Route path="/problems/:id/edit" element={<EditProblem />}/>
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </div>
   );

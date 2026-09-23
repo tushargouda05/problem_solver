@@ -29,14 +29,16 @@ router.post("/", protect, async (req, res) => {
 // Get all problems
 router.get("/", async (req, res) => {
     try {
-        const { category, search } = req.query;
-        const filter = {}; if (category) filter.category = category;
+        const { category, search, author } = req.query;
+        const filter = {};
+        if (category) filter.category = category;
         if (search) filter.title = { $regex: search, $options: "i" };
+        if (author) filter.author = author;
+
         const problems = await Problem.find(filter).populate("author", "username").sort({ createdAt: -1 });
 
         res.status(200).json(problems);
-    }
-    catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
