@@ -25,11 +25,13 @@ const problemSchema = new mongoose.Schema(
 
         image: {
             type: String
-        }
+        },
+        isFlagged: { type: Boolean, default: false }
     },
     {
         timestamps: true
-    }
+    },
+    
 );
 
 module.exports = mongoose.model("Problem", problemSchema);

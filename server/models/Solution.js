@@ -31,7 +31,9 @@ const solutionSchema = new mongoose.Schema(
         },
         image: {
             type: String
-        }
+        },
+        editHistory: [{ content: String, editedAt: { type: Date, default: Date.now } }],
+        isFlagged: { type: Boolean, default: false }
     },
     {
         timestamps: true
