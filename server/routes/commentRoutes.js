@@ -3,9 +3,6 @@ const Comment = require("../models/comment");
 const protect = require("../middleware/authMiddleware");
 const router = express.Router();
 
-// top of commentRoutes.js
-const moderateContent = require("../utils/moderateText");
-const applyModeration = require("../utils/applyModeration");
 
 // add a comment to either a problem or solution
 router.post("/:targetType/:targetId", protect, async (req, res) => {
@@ -13,22 +10,11 @@ router.post("/:targetType/:targetId", protect, async (req, res) => {
         const { content } = req.body;
         const { targetType, targetId } = req.params;
 
-        const { action } = await applyModeration({
-            userId: req.user.id,
-            contentType: "Comment",
-            text: content
-        });
-
-        if (action === "blocked") {
-            return res.status(400).json({ message: "Your content violates community guidelines and was not posted." });
-        }
-
         const comment = new Comment({
             content,
             author: req.user.id,
             targetType,
-            targetId,
-            isFlagged: action === "flagged"
+            targetId
         });
 
         await comment.save();

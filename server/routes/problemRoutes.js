@@ -2,52 +2,39 @@ const express = require("express");
 const Problem = require("../models/problem");
 const protect = require("../middleware/authMiddleware");
 
-const moderateContent = require("../utils/moderateText");
-
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const router = express.Router();
 
 // Create a problem
-const applyModeration = require("../utils/applyModeration");
 
 router.post("/", protect, async (req, res) => {
     try {
         const { title, description, category, image } = req.body;
-
-        const { action } = await applyModeration({
-            userId: req.user.id,
-            contentType: "Problem",
-            text: `${title} ${description}`
-        });
-
-        if (action === "blocked") {
-            return res.status(400).json({ message: "Your content violates community guidelines and was not posted." });
-        }
 
         const newProblem = new Problem({
             title,
             description,
             category,
             image,
-            author: req.user.id,
-            isFlagged: action === "flagged"
+            author: req.user.id
         });
 
         await newProblem.save();
-
         res.status(201).json(newProblem);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
     }
 });
+
 // Get all problems
 router.get("/", async (req, res) => {
     try {
         const { category, search, author } = req.query;
         const filter = {};
-        if (category) filter.category = category;
-        if (search) filter.title = { $regex: search, $options: "i" };
-        if (author) filter.author = author;
+        if (category) filter.category = String(category);
+        if (author) filter.author = String(author);
+        if (search) filter.title = { $regex: escapeRegex(String(search)), $options: "i" }; if (author) filter.author = author;
 
         const problems = await Problem.find(filter).populate("author", "username").sort({ createdAt: -1 });
 
@@ -86,11 +73,8 @@ router.put("/:id", protect, async (req, res) => {
         }
 
         const { title, description, category, image } = req.body;
-        const scores = await moderateContent(title + " " + description);
 
-        if (scores.toxicity > 0.8 || scores.insult > 0.8) {
-            return res.status(400).json({ message: "Your content violates community guidelines and was not posted." });
-        }
+
 
         if (title) problem.title = title;
         if (description) problem.description = description;

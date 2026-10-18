@@ -4,10 +4,8 @@ const Problem = require("../models/problem");
 const protect = require("../middleware/authMiddleware");
 const Solution = require("../models/Solution");
 const Notification = require("../models/notification");
-
-const moderateContent = require("../utils/moderateText");
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const router = express.Router();
-const applyModeration = require("../utils/applyModeration");
 
 router.post("/:problemId", protect, async (req, res) => {
     try {
@@ -18,22 +16,11 @@ router.post("/:problemId", protect, async (req, res) => {
 
         const { content, image } = req.body;
 
-        const { action } = await applyModeration({
-            userId: req.user.id,
-            contentType: "Solution",
-            text: content
-        });
-
-        if (action === "blocked") {
-            return res.status(400).json({ message: "Your content violates community guidelines and was not posted." });
-        }
-
         const newSolution = new Solution({
             problem: req.params.problemId,
             content,
             image,
-            author: req.user.id,
-            isFlagged: action === "flagged"
+            author: req.user.id
         });
 
         await newSolution.save();
@@ -65,23 +52,11 @@ router.put("/:id", protect, async (req, res) => {
 
         const { content, image } = req.body;
 
-        const { action } = await applyModeration({
-            userId: req.user.id,
-            contentType: "Solution",
-            text: content
-        });
-
-        if (action === "blocked") {
-            return res.status(400).json({ message: "Your content violates community guidelines and was not posted." });
-        }
-
         if (content && content !== solution.content) {
             solution.editHistory.push({ content: solution.content });
             solution.content = content;
         }
         if (image) solution.image = image;
-
-        solution.isFlagged = action === "flagged";
 
         await solution.save();
         res.status(200).json(solution);
@@ -98,7 +73,7 @@ router.get("/:problemId", async (req, res) => {
         const { problemId } = req.params;
         const { search } = req.query;
         const filter = { problem: problemId };
-        if (search) filter.content = { $regex: search, $options: "i" };
+        if (search) filter.content = { $regex: escapeRegex(String(search)), $options: "i" }; 
 
         const solutions = await Solution.find(filter)
             .populate("author", "username")

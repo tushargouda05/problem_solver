@@ -22,8 +22,7 @@ const commentSchema = new mongoose.Schema(
         targetId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
-        },
-        isFlagged: { type: Boolean, default: false }
+        }
     },
     {
         timestamps: true,

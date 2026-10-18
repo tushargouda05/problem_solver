@@ -18,10 +18,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        trustScore: {
-            type: Number,
-            default: 100
-        },
+       
 
         role: {
             type: String,

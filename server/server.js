@@ -2,30 +2,49 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const authRoutes = require("./routes/authRoutes");
 const problemRoutes = require("./routes/problemRoutes");
 const solutionRoutes = require("./routes/solutionRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
-const adminRoutes = require("./routes/adminRoutes")
+
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.set("trust proxy", 1);
+
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+app.use(express.json({ limit: "10kb" }));
 app.use("/uploads", express.static("uploads"));
 
-app.use("/api/auth", authRoutes);
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many requests, please try again later." }
+});
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many login attempts, please try again later." }
+});
+
+app.use("/api", apiLimiter);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/solutions", solutionRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/upload", uploadRoutes);
-
 app.use("/api/notifications", notificationRoutes);
-
-app.use("/api/admin", adminRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("MongoDB connected"))
