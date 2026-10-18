@@ -8,7 +8,7 @@ const solutionRoutes = require("./routes/solutionRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
-
+const adminRoutes = require("./routes/adminRoutes")
 dotenv.config();
 
 const app = express();
@@ -24,6 +24,8 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/upload", uploadRoutes);
 
 app.use("/api/notifications", notificationRoutes);
+
+app.use("/api/admin", adminRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("MongoDB connected"))
