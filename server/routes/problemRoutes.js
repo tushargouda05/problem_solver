@@ -78,7 +78,7 @@ router.put("/:id", protect, async (req, res) => {
 
         if (title) problem.title = title;
         if (description) problem.description = description;
-        if (category) problem.category = category;
+        if (category) problem.category = String(category);
         if (image) problem.image = image;
         await problem.save();
         res.status(200).json(problem);
