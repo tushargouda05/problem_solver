@@ -61,7 +61,7 @@ const ProblemDetails = () => {
 
         try {
             await api.delete(`/problems/${id}`);
-            navigate("/");
+            navigate("/problems");
         } catch (err) {
             alert("Failed to delete");
         }
