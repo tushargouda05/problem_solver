@@ -1,10 +1,11 @@
-
 import { Link } from "react-router-dom";
 import api from "../api/axios";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import ProblemFilters from "../components/ProblemFilters";
+import AuthContext from "../context/AuthContext";
 
 const Home = () => {
+    const { user } = useContext(AuthContext);
     const [problems, setProblems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -48,15 +49,21 @@ const Home = () => {
         return matchesCategory && matchesSearch;
     });
     if (loading) {
-        return <p>Loading...</p>;
+        return <main className="feed-shell"><p>Loading problems…</p></main>;
     }
 
     if (error) {
-        return <p className="text-danger">{error}</p>;
+        return <main className="feed-shell"><p className="text-danger">{error}</p></main>;
     }
 
     return (
-        <div className="container mt-4">
+        <main className="feed-shell">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h1 className="feed-heading mb-0">Popular problems</h1>
+                <Link to="/post-problem" className="btn btn-primary rounded-pill d-md-none">+ Create</Link>
+            </div>
+            <div className="feed-layout">
+              <section>
             <ProblemFilters
                 search={search}
                 onSearchChange={setSearch}
@@ -65,41 +72,48 @@ const Home = () => {
                 categories={categories}
                 shown={visible.length}
                 total={problems.length}
-                countClassName="text-white-50"
+                countClassName="text-secondary"
             />
             {problems.length > 0 && visible.length === 0 && (
-                <p className="text-white-50">No problems match your search. Try a different word or clear the filters.</p>
+                <p className="text-secondary">No problems match your search. Try a different word or clear the filters.</p>
             )}
-            <h1 className="text-white">Recent Problems</h1>
 
             {problems.length === 0 ? (
-                <p className="text-white-50">No problems posted yet.</p>
+                <div className="reddit-sidebar"><h2>No problems yet</h2><p>Start the conversation by sharing a problem with the community.</p><Link className="btn btn-primary rounded-pill" to="/post-problem">Create a post</Link></div>
             ) : visible.length === 0 ? (
-                <p className="text-white-50">
+                <p className="text-secondary">
                     No problems match your search. Try a different word or clear the filters.
                 </p>
             ) : (
-                <div className="row">
+                <div>
                     {visible.map((problem) => (
-                        <div className="col-md-4 mb-3" key={problem._id}>
-                            <div className="card h-100">
-                                <div className="card-body">
-                                    <span className="badge bg-secondary mb-2">{problem.category}</span>
-                                    <h5 className="card-title">{problem.title}</h5>
-                                    <p className="card-text">
+                        <article className="reddit-post" key={problem._id}>
+                            <div className="vote-rail" aria-label="Post score"><button className="vote-arrow" aria-label="Upvote">▲</button><span>•</span><button className="vote-arrow" aria-label="Downvote">▼</button></div>
+                            <div className="reddit-post-body">
+                                    <div className="reddit-meta">p/ {problem.category || "community"} · {problem.author?.username || "community member"}</div>
+                                    <h2 className="reddit-title"><Link to={`/problems/${problem._id}`}>{problem.title}</Link></h2>
+                                    <p className="reddit-description">
                                         {problem.description.length > 100
                                             ? problem.description.slice(0, 100) + "..."
                                             : problem.description}
                                     </p>
-                                    <Link to={`/problems/${problem._id}`}
-                                        className="btn btn-primary btn-sm">View</Link>
-                                </div>
+                                    <div className="reddit-actions"><Link to={`/problems/${problem._id}`} className="reddit-action">▤ View discussion</Link><span className="reddit-tag">{problem.category || "General"}</span></div>
                             </div>
-                        </div>
+                        </article>
                     ))}
                 </div>
             )}
-        </div>
+              </section>
+              <aside className="feed-sidebar reddit-sidebar">
+                <h2>Home</h2>
+                <p>Your community feed for questions, ideas, and answers. Browse recent problems or share one of your own.</p>
+                <div className="d-grid gap-2">
+                  <Link to="/problems" className="btn btn-outline-secondary rounded-pill">Browse problems</Link>
+                  <Link to={user ? "/post-problem" : "/register"} className="btn btn-primary rounded-pill">{user ? "Create a post" : "Join the community"}</Link>
+                </div>
+              </aside>
+            </div>
+        </main>
     );
 };
 

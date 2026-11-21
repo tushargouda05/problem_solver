@@ -22,6 +22,12 @@ const commentSchema = new mongoose.Schema(
         targetId: {
             type: mongoose.Schema.Types.ObjectId,
             required: true,
+        },
+
+        parentComment: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Comment",
+            default: null
         }
     },
     {

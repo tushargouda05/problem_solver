@@ -6,7 +6,10 @@ const router = express.Router();
 
 router.get("/", protect, async (req, res) => {
     try {
-        const notifications = await Notification.find({ recipient: req.user.id }).sort({ createdAt: -1 });
+        const notifications = await Notification.find({ recipient: req.user.id })
+            .populate("actor", "username")
+            .populate("relatedProblem", "title")
+            .sort({ createdAt: -1 });
         res.status(200).json(notifications);
     }
     catch (err) {
@@ -29,6 +32,8 @@ router.put("/:id/read", protect, async (req, res) => {
 
         notification.isRead = true;
         await notification.save();
+        await notification.populate("actor", "username");
+        await notification.populate("relatedProblem", "title");
 
         res.status(200).json(notification);
     } catch (error) {

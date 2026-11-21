@@ -21,104 +21,26 @@ const Login = () => {
     };
 
 return (
-    <div
-        className="container-fluid d-flex justify-content-center align-items-center py-5"
-        style={{
-            minHeight: "85vh",
-            backgroundColor: "#9de2ff",
-            borderRadius: "10px",
-        }}
-    >
-        <div className="col-12 col-md-7 col-lg-5 col-xl-4">
-            <div
-                className="card shadow"
-                style={{ borderRadius: "15px" }}
-            >
-                <div className="card-body p-4 p-md-5">
-
-                    {/* Pills Navigation */}
-                    <ul className="nav nav-pills nav-justified mb-4">
-                        <li className="nav-item">
-                            <span className="nav-link active">
-                                Login
-                            </span>
-                        </li>
-                        <li className="nav-item">
-                            <span className="nav-link disabled">
-                                Register
-                            </span>
-                        </li>
-                    </ul>
-
-                    <h3 className="text-center mb-2">Welcome Back!</h3>
-                    <p className="text-center text-muted mb-4">
-                        Sign in to your account
-                    </p>
-
-                    <form onSubmit={handleSubmit}>
-
-                        {/* Email */}
-                        <div className="mb-4">
-                            <label
-                                htmlFor="loginEmail"
-                                className="form-label"
-                            >
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                id="loginEmail"
-                                className="form-control form-control-lg"
-                                placeholder="Enter your email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        {/* Password */}
-                        <div className="mb-4">
-                            <label
-                                htmlFor="loginPassword"
-                                className="form-label"
-                            >
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                id="loginPassword"
-                                className="form-control form-control-lg"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        {/* Error Message */}
-                        {error && (
-                            <div className="alert alert-danger" role="alert">
-                                {error}
-                            </div>
-                        )}
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            className="btn btn-primary btn-lg w-100 mb-4"
-                        >
-                            Login
-                        </button>
-
-                        <p className="text-center text-muted mb-0">
-                            Welcome to Problem Solver!
-                        </p>
-
-                    </form>
+    <main className="auth-screen">
+        <section className="auth-card">
+            <div className="auth-mark" aria-hidden="true">S</div>
+            <h1 className="auth-title">Welcome back</h1>
+            <p className="auth-subtitle">Log in to join the conversation.</p>
+            <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                    <label htmlFor="loginEmail" className="form-label">Email</label>
+                    <input type="email" id="loginEmail" className="form-control" placeholder="you@example.com" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
-            </div>
-        </div>
-    </div>
+                <div className="mb-4">
+                    <label htmlFor="loginPassword" className="form-label">Password</label>
+                    <input type="password" id="loginPassword" className="form-control" placeholder="Your password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                </div>
+                {error && <div className="alert alert-danger py-2" role="alert">{error}</div>}
+                <button type="submit" className="btn btn-primary auth-submit w-100">Log in</button>
+            </form>
+            <p className="auth-switch">New here? <Link to="/register">Create an account</Link></p>
+        </section>
+    </main>
 );
 };
 

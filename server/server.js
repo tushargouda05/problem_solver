@@ -10,6 +10,7 @@ const solutionRoutes = require("./routes/solutionRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 
 dotenv.config();
 
@@ -45,6 +46,7 @@ app.use("/api/solutions", solutionRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/profile", profileRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("MongoDB connected"))

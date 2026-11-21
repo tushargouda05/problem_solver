@@ -8,6 +8,11 @@ const notificationSchema = new mongoose.Schema(
             ref: "User"
         },
 
+        actor: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        },
+
         message: {
             type: String,
             required: true,

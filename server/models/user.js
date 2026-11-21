@@ -30,4 +30,6 @@ const userSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model("User", userSchema);
+// Keep the User model name so existing Mongoose refs continue to populate,
+// while isolating this app's accounts from other projects in the same database.
+module.exports = mongoose.model("User", userSchema, "psusers");

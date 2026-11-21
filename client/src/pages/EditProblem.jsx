@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import AuthContext from "../context/AuthContext";
 
@@ -12,95 +12,72 @@ const EditProblem = () => {
     const [category, setCategory] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-    const fetchProblem = async () => {
-        try {
-            const res = await api.get(`/problems/${id}`);
-
-            if (user && res.data.author._id !== user.id) {
-                navigate(`/problems/${id}`);
-                return;
-            }
-
-            setTitle(res.data.title);
-            setDescription(res.data.description);
-            setCategory(res.data.category);
-        } catch (err) {
-            setError("Failed to load problem");
-        } finally {
-            setLoading(false);
-        }
-    };
-    fetchProblem();
-}, [id, user, navigate]);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         const fetchProblem = async () => {
             try {
                 const res = await api.get(`/problems/${id}`);
-                setTitle(res.data.title); setDescription(res.data.description); setCategory(res.data.category);
-            } catch (err) { setError("Failed to load problem"); }
-            finally { setLoading(false); }
-        }; fetchProblem();
-    }, [id]);
+                if (user && res.data.author?._id !== user.id) {
+                    navigate(`/problems/${id}`);
+                    return;
+                }
+                setTitle(res.data.title || "");
+                setDescription(res.data.description || "");
+                setCategory(res.data.category || "");
+            } catch (err) {
+                setError("We couldn’t load this problem. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProblem();
+    }, [id, user, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError("");
+        setSaving(true);
         try {
-            await api.put(`/problems/${id}`, { title, description, category });
+            await api.put(`/problems/${id}`, { title: title.trim(), description: description.trim(), category: category.trim() });
             navigate(`/problems/${id}`);
-        }
-        catch (err) {
-            setError(err.response?.data?.message || "Failed to update");
-
+        } catch (err) {
+            setError(err.response?.data?.message || "We couldn’t save your changes. Please try again.");
+        } finally {
+            setSaving(false);
         }
     };
-    if (loading) {
-        return <p>Loading...</p>;
-    }
+
+    if (loading) return <main className="problem-form-page"><p>Loading your problem…</p></main>;
+
     return (
-        <div className="container mt-5">
-
-            <h1 className="mb-4">Edit Problem</h1>
-
-            <form onSubmit={handleSubmit}>
-
-                <input
-                    type="text"
-                    className="form-control mb-3"
-                    placeholder="Problem title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
-
-                <textarea
-                    className="form-control mb-3"
-                    rows="4"
-                    placeholder="Describe your problem"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
-
-                <input
-                    type="text"
-                    className="form-control mb-3"
-                    placeholder="Category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                />
-
-                <button type="submit" className="btn btn-primary" >Update Problem</button>
-
-            </form>
-
-            {error && (
-                <p className="text-danger mt-3">
-                    {error}
-                </p>
-            )}
-
-        </div>
+        <main className="problem-form-page">
+            <Link to={`/problems/${id}`} className="problem-back-link">← Back to problem</Link>
+            <section className="problem-form-card">
+                <div className="problem-form-kicker">EDIT YOUR POST</div>
+                <h1>Update your problem</h1>
+                <p className="problem-form-intro">Make your changes below. Your existing discussion will stay with the post.</p>
+                <form onSubmit={handleSubmit}>
+                    <div className="problem-field">
+                        <label htmlFor="problem-title">Title <span>Required</span></label>
+                        <input id="problem-title" className="form-control" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} required />
+                    </div>
+                    <div className="problem-field">
+                        <label htmlFor="problem-description">Details <span>Required</span></label>
+                        <textarea id="problem-description" className="form-control" rows="7" value={description} onChange={(e) => setDescription(e.target.value)} required />
+                    </div>
+                    <div className="problem-field">
+                        <label htmlFor="problem-category">Topic <span>Required</span></label>
+                        <input id="problem-category" className="form-control" value={category} onChange={(e) => setCategory(e.target.value)} maxLength={50} required />
+                    </div>
+                    {error && <div className="alert alert-danger" role="alert">{error}</div>}
+                    <div className="problem-form-actions">
+                        <Link to={`/problems/${id}`} className="btn btn-outline-secondary rounded-pill">Cancel</Link>
+                        <button type="submit" className="btn btn-primary rounded-pill" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>
+                    </div>
+                </form>
+            </section>
+        </main>
     );
 };
 

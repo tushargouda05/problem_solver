@@ -1,5 +1,6 @@
 const express = require("express");
 const Problem = require("../models/problem");
+const User = require("../models/user");
 const protect = require("../middleware/authMiddleware");
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -33,8 +34,12 @@ router.get("/", async (req, res) => {
         const { category, search, author } = req.query;
         const filter = {};
         if (category) filter.category = String(category);
-        if (author) filter.author = String(author);
-        if (search) filter.title = { $regex: escapeRegex(String(search)), $options: "i" }; if (author) filter.author = author;
+        const appUserIds = await User.distinct("_id");
+        const requestedAuthor = author && appUserIds.some((userId) => userId.toString() === String(author));
+        filter.author = author
+            ? (requestedAuthor ? author : { $in: [] })
+            : { $in: appUserIds };
+        if (search) filter.title = { $regex: escapeRegex(String(search)), $options: "i" };
 
         const problems = await Problem.find(filter).populate("author", "username").sort({ createdAt: -1 });
 
@@ -49,7 +54,7 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
     try {
         const problem = await Problem.findById(req.params.id).populate("author", "username");
-        if (!problem) {
+        if (!problem || !problem.author) {
             return res.status(404).json({ message: "Problem not found" });
         }
         res.status(200).json(problem);

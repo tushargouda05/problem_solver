@@ -1,147 +1,101 @@
 import { useState, useContext, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 import AuthContext from "../context/AuthContext";
-import { Link } from "react-router-dom";
+
+const emptyStats = { posts: 0, solutions: 0, comments: 0, likes: 0, dislikes: 0 };
 
 const Profile = () => {
     const { user } = useContext(AuthContext);
-
     const navigate = useNavigate();
     const [problems, setProblems] = useState([]);
+    const [stats, setStats] = useState(emptyStats);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!user) {
-            navigate("/login"); return;
+            navigate("/login");
+            return;
         }
-        const fetchMyProblems = async () => {
+        const fetchProfile = async () => {
             try {
-                const res = await api.get(`/problems?author=${user.id}`); setProblems(res.data);
+                const [problemsResponse, statsResponse] = await Promise.all([
+                    api.get(`/problems?author=${user.id}`),
+                    api.get("/profile/stats")
+                ]);
+                setProblems(problemsResponse.data);
+                setStats({ ...emptyStats, ...statsResponse.data });
             } catch (err) {
                 console.error(err);
-            }
-            finally {
+            } finally {
                 setLoading(false);
             }
         };
-        fetchMyProblems();
+        fetchProfile();
     }, [user, navigate]);
 
+    if (loading) return <main className="profile-page"><p>Loading profile…</p></main>;
+    if (!user) return null;
 
-    if (loading) {
-        return <p>Loading...</p>;
-    }
+    const metrics = [
+        ["Posts", stats.posts, "▤"],
+        ["Solutions", stats.solutions, "✦"],
+        ["Comments", stats.comments, "◌"],
+        ["Likes gained", stats.likes, "♥"],
+        ["Dislikes", stats.dislikes, "♡"]
+    ];
 
-return (
-    <section
-        className="w-100 px-4 py-5"
-        style={{
-            backgroundColor: "#092c3b",
-            borderRadius: ".5rem .5rem 0 0",
-        }}
-    >
-        <div className="row d-flex justify-content-center">
-            <div className="col col-md-9 col-lg-7 col-xl-6">
-                
-                {/* Profile Card */}
-                <div className="card" style={{ borderRadius: "15px" }}>
-                    <div className="card-body p-4">
-                        <div className="d-flex">
-                            <div className="flex-grow-1">
-                                <h5 className="mb-1">{user.username}</h5>
-                                <p className="mb-3 pb-1 text-muted">
-                                    {user.email}
-                                </p>
+    return (
+        <main className="profile-page">
+            <section className="profile-header">
+                <div className="profile-avatar">{user.username?.[0]?.toUpperCase() || "U"}</div>
+                <div className="profile-identity">
+                    <span className="profile-eyebrow">COMMUNITY PROFILE</span>
+                    <h1>{user.username}</h1>
+                    <p>{user.email}</p>
+                </div>
+                <Link to="/post-problem" className="btn btn-primary rounded-pill profile-create">+ Create post</Link>
+            </section>
 
-                                {/* Profile Statistics */}
-                                <div className="d-flex justify-content-start rounded-3 p-3 mb-3 bg-body-tertiary">
-                                    <div>
-                                        <p className="small text-muted mb-1">
-                                            Posts
-                                        </p>
-                                        <p className="mb-0 fw-bold">
-                                            {problems.length}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="d-flex pt-1">
-                                    <Link
-                                        to="/"
-                                        className="btn btn-outline-primary me-2 flex-grow-1"
-                                    >
-                                        Home
-                                    </Link>
-
-                                    <Link
-                                        to="/problems"
-                                        className="btn btn-primary flex-grow-1"
-                                    >
-                                        Explore Posts
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
+            <section className="profile-stats" aria-label="Your activity statistics">
+                {metrics.map(([label, value, icon]) => (
+                    <div className="profile-stat" key={label}>
+                        <span className="profile-stat-icon" aria-hidden="true">{icon}</span>
+                        <strong>{value.toLocaleString()}</strong>
+                        <span>{label}</span>
                     </div>
+                ))}
+            </section>
+
+            <section className="profile-posts-section">
+                <div className="profile-section-heading">
+                    <div><span className="profile-eyebrow">YOUR CONTRIBUTIONS</span><h2>Your posts</h2></div>
+                    <Link to="/problems">Explore community →</Link>
                 </div>
-
-                {/* User Posts */}
-                <div className="mt-4">
-                    <h4 className="mb-3">Your Posts</h4>
-
-                    {problems.length === 0 ? (
-                        <div className="card" style={{ borderRadius: "15px" }}>
-                            <div className="card-body text-center py-4">
-                                <h5>No Posts</h5>
-                                <p className="text-muted mb-0">
-                                    There are no posts to show.
-                                </p>
+                {problems.length === 0 ? (
+                    <div className="profile-empty">
+                        <div className="profile-empty-icon">✦</div>
+                        <h3>Your story starts here</h3>
+                        <p>Share a problem and invite the community to help.</p>
+                        <Link to="/post-problem" className="btn btn-primary rounded-pill">Create your first post</Link>
+                    </div>
+                ) : (
+                    <div className="row g-3">
+                        {problems.map((problem) => (
+                            <div className="col-md-6" key={problem._id}>
+                                <article className="profile-post-card h-100">
+                                    <span className="reddit-tag">{problem.category || "General"}</span>
+                                    <h3><Link to={`/problems/${problem._id}`}>{problem.title}</Link></h3>
+                                    <p>{problem.description.length > 120 ? `${problem.description.slice(0, 120)}…` : problem.description}</p>
+                                    <Link to={`/problems/${problem._id}`} className="reddit-action">▤ View discussion</Link>
+                                </article>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="row">
-                            {problems.map((problem) => (
-                                <div
-                                    className="col-md-6 mb-3"
-                                    key={problem._id}
-                                >
-                                    <div
-                                        className="card h-100"
-                                        style={{ borderRadius: "15px" }}
-                                    >
-                                        <div className="card-body">
-                                            <h5 className="card-title">
-                                                {problem.title}
-                                            </h5>
-
-                                            <span className="badge bg-primary mb-2">
-                                                {problem.category}
-                                            </span>
-
-                                            <p className="card-text">
-                                                {problem.description.length > 100
-                                                    ? problem.description.substring(0, 100) + "..."
-                                                    : problem.description}
-                                            </p>
-
-                                            <Link
-                                                to={`/problems/${problem._id}`}
-                                                className="btn btn-primary"
-                                            >
-                                                View Problem
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    </section>
-);
+                        ))}
+                    </div>
+                )}
+            </section>
+        </main>
+    );
 };
 
 export default Profile;

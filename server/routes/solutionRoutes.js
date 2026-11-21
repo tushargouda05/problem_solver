@@ -3,6 +3,7 @@ const Problem = require("../models/problem");
 
 const protect = require("../middleware/authMiddleware");
 const Solution = require("../models/Solution");
+const User = require("../models/user");
 const Notification = require("../models/notification");
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const router = express.Router();
@@ -28,7 +29,8 @@ router.post("/:problemId", protect, async (req, res) => {
         if (problem.author.toString() !== req.user.id) {
             await Notification.create({
                 recipient: problem.author,
-                message: `Someone answered your problem: "${problem.title}"`,
+                actor: req.user.id,
+                message: `answered your problem: "${problem.title}"`,
                 relatedProblem: problem._id
             });
         }
@@ -72,7 +74,8 @@ router.get("/:problemId", async (req, res) => {
     try {
         const { problemId } = req.params;
         const { search } = req.query;
-        const filter = { problem: problemId };
+        const appUserIds = await User.distinct("_id");
+        const filter = { problem: problemId, author: { $in: appUserIds } };
         if (search) filter.content = { $regex: escapeRegex(String(search)), $options: "i" }; 
 
         const solutions = await Solution.find(filter)

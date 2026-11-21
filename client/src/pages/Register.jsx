@@ -1,151 +1,54 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { Link } from "react-router-dom";
+
 const Register = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
     const [error, setError] = useState("");
-
+    const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
 
     const handleRegister = async (e) => {
         e.preventDefault();
         setError("");
+        setSubmitting(true);
         try {
             await api.post("/auth/register", { username, email, password });
             navigate("/login");
         } catch (err) {
             setError(err.response?.data?.message || "Registration failed");
+        } finally {
+            setSubmitting(false);
         }
     };
 
-
     return (
-        <div
-            className="container-fluid d-flex justify-content-center align-items-center py-5"
-            style={{
-                minHeight: "85vh",
-                backgroundColor: "#9de2ff",
-                borderRadius: "10px",
-            }}
-        >
-            <div className="col-12 col-md-7 col-lg-5 col-xl-4">
-                <div
-                    className="card shadow"
-                    style={{ borderRadius: "15px" }}
-                >
-                    <div className="card-body p-4 p-md-5">
-
-                        {/* Pills Navigation */}
-                        <ul className="nav nav-pills nav-justified mb-4">
-                            <li className="nav-item">
-                                <span className="nav-link disabled">
-                                    Login
-                                </span>
-                            </li>
-                            <li className="nav-item">
-                                <span className="nav-link active">
-                                    Register
-                                </span>
-                            </li>
-                        </ul>
-
-                        <h3 className="text-center mb-2">
-                            Create Account
-                        </h3>
-
-                        <p className="text-center text-muted mb-4">
-                            Join the Problem Solver community
-                        </p>
-
-                        <form onSubmit={handleRegister}>
-
-                            {/* Username */}
-                            <div className="mb-4">
-                                <label
-                                    htmlFor="registerUsername"
-                                    className="form-label"
-                                >
-                                    Username
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="registerUsername"
-                                    className="form-control form-control-lg"
-                                    placeholder="Enter your username"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    required
-                                />
-                            </div>
-
-                            {/* Email */}
-                            <div className="mb-4">
-                                <label
-                                    htmlFor="registerEmail"
-                                    className="form-label"
-                                >
-                                    Email
-                                </label>
-
-                                <input
-                                    type="email"
-                                    id="registerEmail"
-                                    className="form-control form-control-lg"
-                                    placeholder="Enter your email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-
-                            {/* Password */}
-                            <div className="mb-4">
-                                <label
-                                    htmlFor="registerPassword"
-                                    className="form-label"
-                                >
-                                    Password
-                                </label>
-
-                                <input
-                                    type="password"
-                                    id="registerPassword"
-                                    className="form-control form-control-lg"
-                                    placeholder="Create a password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </div>
-
-                            {/* Error Message */}
-                            {error && (
-                                <div className="alert alert-danger" role="alert">
-                                    {error}
-                                </div>
-                            )}
-
-                            {/* Register Button */}
-                            <button
-                                type="submit"
-                                className="btn btn-primary btn-lg w-100 mb-4"
-                            >
-                                Register
-                            </button>
-
-                            <p className="text-center text-muted mb-0">
-                                Start sharing problems and solutions!
-                            </p>
-
-                        </form>
+        <main className="auth-screen">
+            <section className="auth-card">
+                <div className="auth-mark" aria-hidden="true">S</div>
+                <h1 className="auth-title">Join the community</h1>
+                <p className="auth-subtitle">Create an account and share what you know.</p>
+                <form onSubmit={handleRegister}>
+                    <div className="mb-3">
+                        <label htmlFor="registerUsername" className="form-label">Username</label>
+                        <input type="text" id="registerUsername" className="form-control" placeholder="Choose a username" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required />
                     </div>
-                </div>
-            </div>
-        </div>
+                    <div className="mb-3">
+                        <label htmlFor="registerEmail" className="form-label">Email</label>
+                        <input type="email" id="registerEmail" className="form-control" placeholder="you@example.com" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    </div>
+                    <div className="mb-4">
+                        <label htmlFor="registerPassword" className="form-label">Password</label>
+                        <input type="password" id="registerPassword" className="form-control" placeholder="At least 8 characters" autoComplete="new-password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    </div>
+                    {error && <div className="alert alert-danger py-2" role="alert">{error}</div>}
+                    <button type="submit" className="btn btn-primary auth-submit w-100" disabled={submitting}>{submitting ? "Creating account…" : "Create account"}</button>
+                </form>
+                <p className="auth-switch">Already have an account? <Link to="/login">Log in</Link></p>
+            </section>
+        </main>
     );
 };
 
