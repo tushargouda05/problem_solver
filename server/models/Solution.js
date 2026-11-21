@@ -39,4 +39,4 @@ const solutionSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model("Solution", solutionSchema);
+module.exports = mongoose.model("Solution", solutionSchema, "pssolutions");

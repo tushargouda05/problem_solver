@@ -1,6 +1,5 @@
 const express = require("express");
 const Comment = require("../models/comment");
-const User = require("../models/user");
 const Problem = require("../models/problem");
 const Solution = require("../models/Solution");
 const Notification = require("../models/notification");
@@ -83,8 +82,7 @@ router.get("/:targetType/:targetId", async (req, res) => {
     try {
         const { targetId, targetType } = req.params;
         const { search } = req.query;
-        const appUserIds = await User.distinct("_id");
-        const filter = { targetId, targetType, author: { $in: appUserIds } };
+        const filter = { targetId, targetType };
 
         const comments = await Comment.find(filter)
             .populate("author", "username")
