@@ -15,8 +15,10 @@ const ProblemDetails = () => {
     const [error, setError] = useState("");
     const [solutions, setSolutions] = useState([]);
     const [newSolution, setNewSolution] = useState("");
+    const [showSolutionComposer, setShowSolutionComposer] = useState(false);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
+    const [showCommentComposer, setShowCommentComposer] = useState(false);
     const [replyingTo, setReplyingTo] = useState(null);
     const [replyContent, setReplyContent] = useState("");
     const [voting, setVoting] = useState({});
@@ -74,7 +76,9 @@ const ProblemDetails = () => {
         e.preventDefault();
         try {
             const res = await api.post(`/solutions/${id}`, { content: newSolution });
-            setSolutions([...solutions, res.data]); setNewSolution("");
+            setSolutions((current) => [...current, res.data]);
+            setNewSolution("");
+            setShowSolutionComposer(false);
         }
         catch (err) { alert("Failed to post solution"); }
     };
@@ -100,6 +104,7 @@ const ProblemDetails = () => {
                 setReplyingTo(null);
             } else {
                 setNewComment("");
+                setShowCommentComposer(false);
             }
         } catch (err) {
             alert("Failed to post comment");
@@ -161,11 +166,13 @@ const ProblemDetails = () => {
             <section className="discussion-section">
                 <div className="discussion-heading"><div><span className="problem-form-kicker">COMMUNITY ANSWERS</span><h2>Solutions <span>{solutions.length}</span></h2></div></div>
                 {user ? (
-                    <form className="discussion-composer" onSubmit={handlePostSolution}>
-                        <label htmlFor="solution-content">Share a helpful solution</label>
-                        <textarea id="solution-content" className="form-control" rows="4" value={newSolution} onChange={(e) => setNewSolution(e.target.value)} placeholder="Explain what worked, or offer a useful next step…" required />
-                        <div className="text-end mt-2"><button className="btn btn-primary rounded-pill" disabled={!newSolution.trim()}>Post solution</button></div>
-                    </form>
+                    showSolutionComposer ? (
+                        <form className="discussion-composer" onSubmit={handlePostSolution}>
+                            <label htmlFor="solution-content">Your solution</label>
+                            <textarea id="solution-content" className="form-control" rows="4" value={newSolution} onChange={(e) => setNewSolution(e.target.value)} placeholder="Explain what worked, or offer a useful next step…" required autoFocus />
+                            <div className="composer-actions"><button type="button" className="btn btn-sm btn-outline-secondary rounded-pill" onClick={() => { setShowSolutionComposer(false); setNewSolution(""); }}>Cancel</button><button className="btn btn-primary rounded-pill" disabled={!newSolution.trim()}>Post solution</button></div>
+                        </form>
+                    ) : <button type="button" className="composer-open-button" onClick={() => setShowSolutionComposer(true)}><span aria-hidden="true">＋</span> Share a helpful solution</button>
                 ) : <p className="discussion-signin"><Link to="/login">Log in</Link> to share a solution.</p>}
 
                 {solutions.length === 0 ? <div className="discussion-empty"><strong>No solutions yet</strong><span>Be the first to help with this problem.</span></div> : (
@@ -190,11 +197,13 @@ const ProblemDetails = () => {
             <section className="discussion-section comments-section">
                 <div className="discussion-heading"><div><span className="problem-form-kicker">KEEP IT GOING</span><h2>Comments <span>{comments.length}</span></h2></div></div>
                 {user ? (
-                    <form className="thread-composer discussion-composer" onSubmit={(e) => handlePostComment(e)}>
-                        <label htmlFor="comment-content">Add a comment</label>
-                        <textarea id="comment-content" className="form-control" rows="3" value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Ask a follow-up or add context…" required />
-                        <div className="text-end mt-2"><button className="btn btn-primary rounded-pill" disabled={!newComment.trim()}>Post comment</button></div>
-                    </form>
+                    showCommentComposer ? (
+                        <form className="thread-composer discussion-composer" onSubmit={(e) => handlePostComment(e)}>
+                            <label htmlFor="comment-content">Your comment</label>
+                            <textarea id="comment-content" className="form-control" rows="3" value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Ask a follow-up or add context…" required autoFocus />
+                            <div className="composer-actions"><button type="button" className="btn btn-sm btn-outline-secondary rounded-pill" onClick={() => { setShowCommentComposer(false); setNewComment(""); }}>Cancel</button><button className="btn btn-primary rounded-pill" disabled={!newComment.trim()}>Post comment</button></div>
+                        </form>
+                    ) : <button type="button" className="composer-open-button" onClick={() => setShowCommentComposer(true)}><span aria-hidden="true">＋</span> Add a comment</button>
                 ) : <p className="discussion-signin"><Link to="/login">Log in</Link> to join the discussion.</p>}
                 {rootComments.length === 0 ? <div className="discussion-empty"><strong>No comments yet</strong><span>Start a friendly conversation about this problem.</span></div> : <div className="comment-thread-list">{rootComments.map((comment) => renderComment(comment))}</div>}
             </section>

@@ -178,6 +178,10 @@ h1, h2, h3, h4, h5, h6 { color: var(--ig-text); }
 .discussion-heading h2 { display: flex; align-items: center; gap: 9px; margin: 3px 0 0; font-size: 21px; font-weight: 750; }
 .discussion-heading h2 span { display: inline-grid; min-width: 24px; height: 24px; place-items: center; padding: 0 6px; border-radius: 20px; background: #29232f; color: #d8b4fe; font-size: 12px; }
 .discussion-composer { margin: 0 0 18px; padding: 16px; border: 1px solid var(--ig-border); border-radius: 10px; background: #111114; }
+.composer-open-button { display: flex; width: 100%; align-items: center; gap: 10px; min-height: 50px; padding: 12px 15px; border: 1px solid var(--ig-border); border-radius: 10px; background: #111114; color: #a1a1aa; font-size: 13px; text-align: left; transition: border-color .15s, background .15s, color .15s; }
+.composer-open-button:hover { border-color: #71548b; background: #19151e; color: #e4d0f7; }
+.composer-open-button > span { display: grid; width: 25px; height: 25px; place-items: center; border-radius: 50%; background: #30203e; color: #d8b4fe; font-size: 17px; }
+.composer-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
 .discussion-composer .form-control { border-radius: 8px; resize: vertical; }
 .discussion-signin { margin: 0 0 18px; padding: 14px 16px; border-radius: 8px; background: #111114; color: var(--ig-muted); font-size: 13px; }
 .discussion-signin a { font-weight: 700; }
