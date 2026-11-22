@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import AuthContext from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import LoadingScreen from "../components/LoadingScreen";
 
 const Notifications = () => {
     const { user } = useContext(AuthContext);
@@ -51,7 +52,7 @@ const Notifications = () => {
         }
     };
     if (loading) {
-        return <p>Loading...</p>;
+        return <LoadingScreen message="Loading your notifications…" />;
     }
 
     return (

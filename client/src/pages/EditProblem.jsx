@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import AuthContext from "../context/AuthContext";
+import LoadingScreen from "../components/LoadingScreen";
 
 const EditProblem = () => {
     const { user } = useContext(AuthContext);
@@ -48,7 +49,7 @@ const EditProblem = () => {
         }
     };
 
-    if (loading) return <main className="problem-form-page"><p>Loading your problem…</p></main>;
+    if (loading) return <LoadingScreen message="Loading your problem…" />;
 
     return (
         <main className="problem-form-page">

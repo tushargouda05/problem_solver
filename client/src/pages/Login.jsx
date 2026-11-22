@@ -6,17 +6,21 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        setSubmitting(true);
         try {
             await login(email, password);
             navigate("/problems");
         } catch (err) {
             setError("Invalid email or password");
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -36,7 +40,7 @@ return (
                     <input type="password" id="loginPassword" className="form-control" placeholder="Your password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
                 {error && <div className="alert alert-danger py-2" role="alert">{error}</div>}
-                <button type="submit" className="btn btn-primary auth-submit w-100">Log in</button>
+                <button type="submit" className="btn btn-primary auth-submit w-100" disabled={submitting}>{submitting ? <><span className="button-spinner" aria-hidden="true" /> Signing in…</> : "Log in"}</button>
             </form>
             <p className="auth-switch">New here? <Link to="/register">Create an account</Link></p>
         </section>

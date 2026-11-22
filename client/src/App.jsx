@@ -9,11 +9,13 @@ import EditProblem from './pages/EditProblem';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
 import Landing from './pages/Landing';
+import RouteChangeLoader from './components/RouteChangeLoader';
 
 function App() {
   return (
     <div>
       <Navbar />
+      <RouteChangeLoader />
 
       <Routes>
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
 import AuthContext from "../context/AuthContext";
+import LoadingScreen from "../components/LoadingScreen";
 
 const steps = [
     { number: "01", title: "Ask clearly", body: "Describe what you’re working on and add the details people need to help." },
@@ -55,7 +56,7 @@ const Landing = () => {
                     <div><span className="landing-eyebrow">FROM THE COMMUNITY</span><h2>Questions people are asking</h2></div>
                     <Link to="/problems">See all questions <span aria-hidden="true">→</span></Link>
                 </div>
-                {loading ? <div className="landing-empty">Finding the latest questions…</div> : recent.length === 0 ? (
+                {loading ? <LoadingScreen message="Finding the latest questions…" compact /> : recent.length === 0 ? (
                     <div className="landing-empty"><div className="landing-empty-mark">✦</div><strong>Be the first to ask</strong><span>Every useful conversation starts with a question.</span>{user && <Link to="/post-problem" className="btn btn-primary rounded-pill">Ask a question</Link>}</div>
                 ) : (
                     <div className="landing-question-list">

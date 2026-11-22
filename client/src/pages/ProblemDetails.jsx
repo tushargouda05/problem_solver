@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import AuthContext from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import LoadingScreen from "../components/LoadingScreen";
 
 const ProblemDetails = () => {
     const { id } = useParams();
@@ -136,7 +137,7 @@ const ProblemDetails = () => {
             </div>
         </article>
     );
-    if (loading) return <main className="problem-view"><p>Loading problem…</p></main>;
+    if (loading) return <LoadingScreen message="Loading the discussion…" />;
 
     if (error) {
         return <main className="problem-view"><div className="alert alert-danger">{error}</div><Link to="/problems">Back to problems</Link></main>;

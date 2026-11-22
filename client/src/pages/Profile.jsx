@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 import AuthContext from "../context/AuthContext";
+import LoadingScreen from "../components/LoadingScreen";
 
 const emptyStats = { posts: 0, solutions: 0, comments: 0, likes: 0, dislikes: 0 };
 
@@ -34,7 +35,7 @@ const Profile = () => {
         fetchProfile();
     }, [user, navigate]);
 
-    if (loading) return <main className="profile-page"><p>Loading profile…</p></main>;
+    if (loading) return <LoadingScreen message="Loading your profile…" />;
     if (!user) return null;
 
     const metrics = [

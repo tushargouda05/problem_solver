@@ -3,6 +3,7 @@ import api from "../api/axios";
 import { useState, useEffect, useMemo, useContext } from "react";
 import ProblemFilters from "../components/ProblemFilters";
 import AuthContext from "../context/AuthContext";
+import LoadingScreen from "../components/LoadingScreen";
 
 const Home = () => {
     const { user } = useContext(AuthContext);
@@ -49,7 +50,7 @@ const Home = () => {
         return matchesCategory && matchesSearch;
     });
     if (loading) {
-        return <main className="feed-shell"><p>Loading problems…</p></main>;
+        return <LoadingScreen message="Finding community questions…" />;
     }
 
     if (error) {
